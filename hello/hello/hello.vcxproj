@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{10F1C6F3-BF27-4651-8AC4-8253C1EF6040}</ProjectGuid>
+    <ProjectGuid>{F9071385-1784-4A95-9CBE-8CAD45F91E0A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Red_Black_tree구현</RootNamespace>
+    <RootNamespace>hello</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="소스.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
