@@ -359,7 +359,10 @@ void RB_inorder(RB_Tree* self, Node* tree,int* total)
 		return;
 	else {
 		RB_inorder(self, tree->left,total);
-		printf("%d ", tree->value);
+		if (tree->value != NULL)
+		{
+			printf("%d ", tree->value);
+		}
 		(*total) += 1;
 		RB_inorder(self, tree->right,total);
 	}
