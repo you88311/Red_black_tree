@@ -344,9 +344,7 @@ void RB_Tree_print(RB_Tree* self, Node* tree, int level, int* bn_count)
 {
 	if (tree->right != NULL)
 		RB_Tree_print(self, tree->right, level + 1,bn_count);
-	for (int i = 0; i < level; i++)
-		printf("    ");
-	printf("%d\n", tree->value);
+
 	if (tree->color == BLACK)
 		*bn_count += 1;
 	if (tree->left != NULL)
