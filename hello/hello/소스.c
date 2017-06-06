@@ -175,6 +175,18 @@ void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 	{
 		RB_Tree_insert_fix(insert_node, self);
 	}
+	if (insert_node->left == NULL)
+	{
+		insert_node->left = node_alloc(NULL);
+		insert_node->left->color = BLACK;
+		insert_node->left->parent = insert_node;
+	}
+	if (insert_node->right == NULL)
+	{
+		insert_node->right = node_alloc(NULL);
+		insert_node->right->color = BLACK;
+		insert_node->right->parent = insert_node;
+	}
 }
 
 
@@ -289,12 +301,12 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 	Node* y = delete_node;
 	Node* x = NULL;
 	int y_original_color = delete_node->color;
-	if (delete_node->left == NULL)
+	if (delete_node->left->value == NULL)
 	{
 		x = delete_node->right;
 		RB_transplant(self, delete_node, x);
 	}
-	else if (delete_node->right == NULL)
+	else if (delete_node->right->value == NULL)
 	{
 		x = delete_node->left;
 		RB_transplant(self, delete_node, x);
