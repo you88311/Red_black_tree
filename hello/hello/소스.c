@@ -85,36 +85,6 @@ void right_rotate(Node* node, RB_Tree* self)
 	child->right = node;
 	node->parent = child;
 }
-void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
-{
-
-	if (self->root = NULL) //Root가 비어있는 경우
-	{
-		self->root = insert_node;
-		insert_node->color = BLACK;
-	}
-	else if (insert_node->value <tree->value) //현재 노드보다 작은 경우
-	{
-		if (tree->left == NULL)
-		{
-			tree->left = insert_node;
-			insert_node->parent = tree;
-		}
-		else
-			tree_insert(insert_node, self, tree->left);
-	}
-	else                      //현재 노드보다 큰 경우
-	{
-		if (tree->right == NULL)
-		{
-			tree->right = insert_node;
-			insert_node->parent = tree;
-		}
-		else
-			tree_insert(insert_node, self, tree->right);
-	}
-	void RB_Tree_insert_fix(insert_node, self);
-}
 
 void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 {
@@ -139,7 +109,7 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				/*case2*/
 				if (insert_node = insert_node->parent->right)
 				{
-					left_rotate(insert_node->parent,self);
+					left_rotate(insert_node->parent, self);
 				}
 				/*case3*/
 				insert_node->parent = BLACK;
@@ -174,14 +144,176 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 	self->root = BLACK;
 }
 
+void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
+{
+
+	if (self->root = NULL) //Root가 비어있는 경우
+	{
+		self->root = insert_node;
+		insert_node->color = BLACK;
+	}
+	else if (insert_node->value <tree->value) //현재 노드보다 작은 경우
+	{
+		if (tree->left == NULL)
+		{
+			tree->left = insert_node;
+			insert_node->parent = tree;
+		}
+		else
+			tree_insert(insert_node, self, tree->left);
+	}
+	else                      //현재 노드보다 큰 경우
+	{
+		if (tree->right == NULL)
+		{
+			tree->right = insert_node;
+			insert_node->parent = tree;
+		}
+		else
+			tree_insert(insert_node, self, tree->right);
+	}
+	RB_Tree_insert_fix(insert_node, self);
+}
+
+
+Node* tree_minimum(Node* node) //주어진 node보다 작거나 같은 node 찾는 함수
+{
+	if (node->left == NULL)
+		return node;
+	else
+		return tree_minimum(node->left);
+}
+
+void RB_transplant(RB_Tree* self, Node* delete_node, Node* child)
+{
+	if (delete_node->parent == NULL)
+	{
+		self->root = child;
+	}
+	else if (delete_node == delete_node->parent->left)
+	{
+		delete_node->parent->left = child;
+	}
+	else
+	{
+		delete_node->parent->right = child;
+	}
+	child->parent = delete_node->parent;
+}
+
+void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
+{
+	Node*w = NULL;
+
+	while (x != self->root && x->color == BLACK)
+	{
+		if (x == x->parent->left)
+		{
+			w = x->parent->right;
+			if (w->color == RED)
+			{
+				w->color = BLACK;
+				x->parent = RED;
+				left_rotate(x->parent, self);
+				w = x->parent->right;
+			}
+			if (w->left->color == BLACK && w->right->color == BLACK)
+			{
+				w->color = RED;
+				x = x->parent;
+			}
+			else if (w->right->color == BLACK)
+			{
+				w->left->color = BLACK;
+				w->color = RED;
+				right_rotate(w, self);
+				w = x->parent->right;
+			}
+
+			w->color = x->parent->color;
+			x->parent->color = BLACK;
+			w->right->color = BLACK;
+			left_rotate(x->parent, self);
+			x = self->root;
+		}
+		else if (x == x->parent->right)
+		{
+			w = x->parent->left;
+			if (w->color == RED)
+			{
+				w->color = BLACK;
+				x->parent = RED;
+				right_rotate(x->parent, self);
+				w = x->parent->left;
+			}
+			if (w->left->color == BLACK && w->right->color == BLACK)
+			{
+				w->color = RED;
+				x = x->parent;
+			}
+			else if (w->left->color == BLACK)
+			{
+				w->right->color = BLACK;
+				w->color = RED;
+				left_rotate(w, self);
+				w = x->parent->left;
+			}
+			w->color = x->parent->color;
+			x->parent->color = BLACK;
+			w->left->color = BLACK;
+			right_rotate(x->parent, self);
+			x = self->root;
+		}
+	}
+	x->color = BLACK;
+}
+
 void tree_delete(Node* delete_node, RB_Tree* self, Node* tree)
 {
+	Node* y = delete_node;
+	Node* x = NULL;
+	int y_original_color = delete_node->color;
+	if (delete_node->left == NULL)
+	{
+		x = delete_node->right;
+		RB_transplant(self, delete_node, x);
+	}
+	else if (delete_node->right == NULL)
+	{
+		x = delete_node->left;
+		RB_transplant(self, delete_node, x);
+	}
+	else //leaf 아닌 child가 두 개인 경우
+	{
+		y = tree_minimum(delete_node->right);
+		y_original_color = y->color;
+		x = y->right;
+		if (y->parent == delete_node)
+		{
+			x->parent = y;
+		}
+		else
+		{
+			RB_transplant(self, y, y->right);
+			y->right = delete_node->right;
+			y->right->parent = y;
+		}
 
+		RB_transplant(self, delete_node, y);
+		y->left = delete_node->left;
+		y->left->parent = y;
+		y->color = delete_node->color;
+	}
+	if (y_original_color == BLACK)
+	{
+		RB_Tree_delte_fix(x,self,tree);
+	}
 }
-void RB_Tree_delte_fix(Node* delte_node, RB_Tree* self, Node* tree)
-{
 
-}
+
+
+
+
 
 int main(void)
 {
