@@ -107,7 +107,7 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 			else
 			{
 				/*case2*/
-				if (insert_node = insert_node->parent->right)
+				if (insert_node == insert_node->parent->right)
 				{
 					left_rotate(insert_node->parent, self);
 				}
@@ -130,7 +130,7 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 			else
 			{
 				/*case2*/
-				if (insert_node = insert_node->parent->left)
+				if (insert_node == insert_node->parent->left)
 				{
 					right_rotate(insert_node->parent, self);
 				}
@@ -344,7 +344,9 @@ void RB_Tree_print(RB_Tree* self, Node* tree, int level, int* bn_count)
 {
 	if (tree->right != NULL)
 		RB_Tree_print(self, tree->right, level + 1,bn_count);
-
+	for (int i = 0; i < level; i++)
+		printf("    ");
+	printf("%d\n", tree->value);
 	if (tree->color == BLACK)
 		*bn_count += 1;
 	if (tree->left != NULL)
@@ -369,7 +371,7 @@ int main(void)
 {
 	int data = 0;
 	int is_running = 1;
-	int bn_count = 0;
+	int nb_count = 0; //number of black node
 	int total = 0;
 	int black_height_level=0;
 
@@ -390,10 +392,10 @@ int main(void)
 		else if (data == 0)
 		{
 			puts("Red_Black tree print!");
-			RB_Tree_print(self, self->root, 0, &bn_count);
+			RB_Tree_print(self, self->root, 0, &nb_count);
 			puts("Red-Black tree inorder traversal °á°ú");
 			RB_inorder(self, self->root,&total);
-			printf("total: %d, bn: %d\n", total, bn_count);
+			printf("total: %d, nb: %d\n", total, nb_count);
 			is_running = 0;
 		}
 	}
