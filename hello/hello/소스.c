@@ -189,7 +189,6 @@ void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 	}
 }
 
-
 Node* tree_minimum(Node* node) //주어진 node보다 작거나 같은 node 찾는 함수
 {
 	if (node->left == NULL)
@@ -301,7 +300,10 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 	Node* y = delete_node;
 	Node* x = NULL;
 	if (delete_node == NULL)
+	{
+		printf("%d 값을 지닌 노드 존재하지 않는다.\n", data);
 		return;
+	}
 	int y_original_color = delete_node->color;
 	if (delete_node->left->value == NULL)
 	{
@@ -353,19 +355,24 @@ void RB_Tree_print(RB_Tree* self, Node* tree, int level, int* bn_count)
 		RB_Tree_print(self, tree->left, level + 1,bn_count);
 }
 
-void RB_inorder(RB_Tree* self, Node* tree,int* total) 
+void RB_inorder(RB_Tree* self, Node* tree,int* total,int* nb_count) 
 {
 	if (tree == NULL)
 		return;
 	else {
-		RB_inorder(self, tree->left,total);
+		RB_inorder(self, tree->left,total,nb_count);
 		if (tree->value != NULL)
 		{
 			printf("%d ", tree->value);
+			if (tree->color == RED)
+			{
+				(*nb_count) += 1;
+			}
 		}
 		(*total) += 1;
-		RB_inorder(self, tree->right,total);
+		RB_inorder(self, tree->right,total,nb_count);
 	}
+	*nb_count = *total - *nb_count;
 }
 int main(void)
 {
@@ -391,10 +398,10 @@ int main(void)
 		}
 		else if (data == 0)
 		{
-			puts("Red_Black tree print!");
-			RB_Tree_print(self, self->root, 0, &nb_count);
+			//puts("Red_Black tree print!");
+			//RB_Tree_print(self, self->root, 0, &nb_count);
 			puts("Red-Black tree inorder traversal 결과");
-			RB_inorder(self, self->root,&total);
+			RB_inorder(self, self->root,&total,&nb_count);
 			printf("total: %d, nb: %d\n", total, nb_count);
 			is_running = 0;
 		}
