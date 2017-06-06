@@ -300,6 +300,8 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 	Node*delete_node = tree_search(tree, data);
 	Node* y = delete_node;
 	Node* x = NULL;
+	if (delete_node == NULL)
+		return;
 	int y_original_color = delete_node->color;
 	if (delete_node->left->value == NULL)
 	{
