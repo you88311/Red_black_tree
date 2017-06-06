@@ -141,18 +141,17 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 			}
 		}
 	}
-	self->root = BLACK;
+	self->root->color = BLACK;
 }
 
 void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 {
-
-	if (self->root = NULL) //Root가 비어있는 경우
+	if (self->root == NULL) //Root가 비어있는 경우
 	{
 		self->root = insert_node;
 		insert_node->color = BLACK;
 	}
-	else if (insert_node->value <tree->value) //현재 노드보다 작은 경우
+	else if (insert_node->value < tree->value) //현재 노드보다 작은 경우
 	{
 		if (tree->left == NULL)
 		{
@@ -172,7 +171,10 @@ void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 		else
 			tree_insert(insert_node, self, tree->right);
 	}
-	RB_Tree_insert_fix(insert_node, self);
+	if (insert_node->parent != NULL)
+	{
+		RB_Tree_insert_fix(insert_node, self);
+	}
 }
 
 
@@ -201,6 +203,19 @@ void RB_transplant(RB_Tree* self, Node* delete_node, Node* child)
 	child->parent = delete_node->parent;
 }
 
+Node* tree_search(Node* tree, int val)  //특정값을 갖는 노드를 찾아 반환하는 함수
+{
+	if (tree == NULL || tree->value == val)
+	{
+		return tree;
+	}
+	if (tree->value < val)
+	{
+		return tree_search(tree->right, val);
+	}
+	else
+		return tree_search(tree->left, val);
+}
 void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 {
 	Node*w = NULL;
@@ -268,8 +283,9 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 	x->color = BLACK;
 }
 
-void tree_delete(Node* delete_node, RB_Tree* self, Node* tree)
+void tree_delete(int data, RB_Tree* self, Node* tree)
 {
+	Node*delete_node = tree_search(tree, data);
 	Node* y = delete_node;
 	Node* x = NULL;
 	int y_original_color = delete_node->color;
@@ -310,33 +326,59 @@ void tree_delete(Node* delete_node, RB_Tree* self, Node* tree)
 	}
 }
 
+void RB_Tree_print(RB_Tree* self, Node* tree, int level, int* bn_count) 
+{
+	if (tree->right != NULL)
+		RB_Tree_print(self, tree->right, level + 1,bn_count);
+	for (int i = 0; i < level; i++)
+		printf("    ");
+	printf("%d\n", tree->value);
+	if (tree->color == BLACK)
+		*bn_count += 1;
+	if (tree->left != NULL)
+		RB_Tree_print(self, tree->left, level + 1,bn_count);
+}
 
-
-
-
-
+void RB_inorder(RB_Tree* self, Node* tree,int* total) 
+{
+	if (tree == NULL)
+		return;
+	else {
+		RB_inorder(self, tree->left,total);
+		printf("%d ", tree->value);
+		(*total) += 1;
+		RB_inorder(self, tree->right,total);
+	}
+}
 int main(void)
 {
-	int index = 0;
 	int data = 0;
 	int is_running = 1;
-	RB_Tree* tree = RB_Tree_alloc(); //RB_tree 선언
+	int bn_count = 0;
+	int total = 0;
+	int black_height_level=0;
 
+	RB_Tree* self = RB_Tree_alloc(); //RB_tree 선언
+	FILE *fp = fopen("input.txt", "r");
 	while (is_running)
 	{
-		FILE *fp = fopen("input.txt", "r");
 		fscanf(fp, "%d", &data);
 		if (data > 0)
 		{
-
+			tree_insert(node_alloc(data), self, self->root);
 		}
 		else if (data < 0)
 		{
-
+			data = -data;
+			tree_delete(data, self, self->root);
 		}
 		else if (data == 0)
 		{
-
+			puts("Red_Black tree print!");
+			RB_Tree_print(self, self->root, 0, &bn_count);
+			puts("Red-Black tree inorder traversal 결과");
+			RB_inorder(self, self->root,&total);
+			printf("total: %d, bn: %d\n", total, bn_count);
 			is_running = 0;
 		}
 	}
