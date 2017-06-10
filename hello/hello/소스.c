@@ -235,7 +235,7 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 {
 	Node*s = NULL; //sibling 노드
 
-	while (x != self->root && x != self->nillnode && x->color == BLACK)
+	while (x != self->root && x->color == BLACK)
 	{
 		if (x == x->parent->left)
 		{
@@ -396,10 +396,6 @@ int main(void)
 		else if (data == 0)
 		{
 			puts("Red_Black tree print!");
-			RB_Tree_print(self, self->root, 0, &nb_count);
-			puts("Red-Black tree inorder traversal 결과");
-			RB_inorder(self, self->root, &total);
-			printf("total: %d, nb: %d\n", total, nb_count);
 			is_running = 0;
 		}
 	}
