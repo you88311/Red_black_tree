@@ -88,10 +88,11 @@ void right_rotate(Node* node, RB_Tree* self)
 
 void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 {
+
 	Node* Grandparent = insert_node->parent->parent;
 	Node* Uncle = NULL;
 
-	while (insert_node->parent->color == RED) //부모 노드가 RED인 경우
+	while (Grandparent!=NULL && insert_node->parent!=NULL && insert_node->parent->color == RED) //부모 노드가 RED인 경우
 	{
 		Grandparent = insert_node->parent->parent;
 		if (insert_node->parent == Grandparent->left) // 부모노드가 Grandparent의 left인 경우
@@ -102,7 +103,12 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				insert_node->parent = BLACK;
 				Uncle->color = BLACK;
 				Grandparent = RED;
-				insert_node = Grandparent; //나머지 그 위 노드에 대해서는 while문에 맡긴다
+				if (insert_node->parent->value != NULL && insert_node->parent->parent->value != NULL)
+				{
+					insert_node = insert_node->parent->parent; //나머지 그 위 노드들에 대해서는 while문에 맡긴다
+				}
+				else
+					break;
 			}
 			else
 			{
@@ -125,7 +131,12 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				insert_node->parent = BLACK;
 				Uncle->color = BLACK;
 				Grandparent = RED;
-				insert_node = Grandparent; //나머지 그 위 노드들에 대해서는 while문에 맡긴다
+				if (insert_node->parent->value != NULL && insert_node->parent->parent->value != NULL)
+				{
+					insert_node = insert_node->parent->parent; //나머지 그 위 노드들에 대해서는 while문에 맡긴다
+				}
+				else
+					break;
 			}
 			else
 			{
@@ -140,6 +151,8 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				left_rotate(Grandparent, self);
 			}
 		}
+		if (insert_node == NULL)
+			break;
 	}
 	self->root->color = BLACK;
 }
@@ -151,42 +164,47 @@ void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 		self->root = insert_node;
 		insert_node->color = BLACK;
 	}
-	else if (insert_node->value < tree->value) //현재 노드보다 작은 경우
+	else
 	{
-		if (tree->left == NULL)
+		while (tree != NULL)
 		{
-			tree->left = insert_node;
-			insert_node->parent = tree;
+			if (insert_node->value < tree->value) //현재 노드보다 작은 경우
+			{
+				if (tree->left == NULL)
+				{
+					tree->left = insert_node;
+					insert_node->parent = tree;
+				}
+				else
+					tree = tree->left;
+			}
+			else                      //현재 노드보다 큰 경우
+			{
+				if (tree->right == NULL)
+				{
+					tree->right = insert_node;
+					insert_node->parent = tree;
+				}
+				else
+					tree = tree->right;
+			}
 		}
-		else
-			tree_insert(insert_node, self, tree->left);
 	}
-	else                      //현재 노드보다 큰 경우
-	{
-		if (tree->right == NULL)
-		{
-			tree->right = insert_node;
-			insert_node->parent = tree;
-		}
-		else
-			tree_insert(insert_node, self, tree->right);
-	}
+
+	/*left,right child t.nill로 초기화*/
+	insert_node->left = node_alloc(NULL);
+	insert_node->left->color = BLACK;
+	insert_node->left->parent = insert_node;
+	insert_node->right = node_alloc(NULL);
+	insert_node->right->color = BLACK;
+	insert_node->right->parent = insert_node;
+
 	if (insert_node->parent != NULL)
 	{
 		RB_Tree_insert_fix(insert_node, self);
 	}
-	if (insert_node->left == NULL)
-	{
-		insert_node->left = node_alloc(NULL);
-		insert_node->left->color = BLACK;
-		insert_node->left->parent = insert_node;
-	}
-	if (insert_node->right == NULL)
-	{
-		insert_node->right = node_alloc(NULL);
-		insert_node->right->color = BLACK;
-		insert_node->right->parent = insert_node;
-	}
+		
+	
 }
 
 Node* tree_minimum(Node* node) //주어진 node보다 작거나 같은 node 찾는 함수

@@ -1,0 +1,9 @@
+diff a/hello/hello/소스.c b/hello/hello/소스.c	(rejected hunks)
+@@ -189,7 +189,6 @@
+ 	}
+ }
+ 
+-
+ Node* tree_minimum(Node* node) //�־��� node���� �۰ų� ���� node ã�� �Լ�
+ {
+ 	if (node->left == NULL)
