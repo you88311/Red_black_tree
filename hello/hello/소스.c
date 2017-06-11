@@ -46,7 +46,7 @@ void left_rotate(Node* node, RB_Tree* self)
 {
 	Node* child = node->right;
 	node->right = child->left;
-	if (child->left != self->nillnode)
+	if (child->left != self->nillnode )
 	{
 		child->left->parent = node;
 	}
@@ -70,7 +70,7 @@ void right_rotate(Node* node, RB_Tree* self)
 {
 	Node* child = node->left;
 	node->left = child->right;
-	if (child->right != self->nillnode)
+	if (child->right != self->nillnode )
 	{
 		child->right->parent = node;
 	}
@@ -98,16 +98,15 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 
 	while (  insert_node->parent != self->nillnode  && insert_node->parent->color == RED ) //부모 노드가 RED인 경우
 	{
-		Grandparent = insert_node->parent->parent;
-		if (insert_node->parent == Grandparent->left) // 부모노드가 Grandparent의 left인 경우
+		if (insert_node->parent == insert_node->parent->parent->left) // 부모노드가 Grandparent의 left인 경우
 		{
-			Uncle = Grandparent->right;
+			Uncle = insert_node->parent->parent->right;
 			if (Uncle->color == RED) /*case 1*/    //uncle이 red인 경우
 			{
 				insert_node->parent->color = BLACK;
 				Uncle->color = BLACK;
-				Grandparent->color = RED;
-				insert_node = Grandparent; //나머지 그 위 노드에 대해서는 while문에 맡긴다
+				insert_node->parent->parent->color = RED;
+				insert_node = insert_node->parent->parent; //나머지 그 위 노드에 대해서는 while문에 맡긴다
 			}
 			else                                       //uncle이 black인 경우
 			{
@@ -124,15 +123,15 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				right_rotate(insert_node->parent->parent, self);
 			}
 		}
-		else if(insert_node->parent==Grandparent->right)//부모노드가 Grand	parent의 right인 경우
+		else if(insert_node->parent== insert_node->parent->parent->right)//부모노드가 Grand	parent의 right인 경우
 		{
-			Uncle = Grandparent->left;
+			Uncle = insert_node->parent->parent->left;
 			if (Uncle->color == RED) /*case 1*/
 			{
 				insert_node->parent->color = BLACK;
 				Uncle->color = BLACK;
-				Grandparent->color = RED;
-				insert_node = Grandparent; //나머지 그 위 노드들에 대해서는 while문에 맡긴다
+				insert_node->parent->parent->color = RED;
+				insert_node = insert_node->parent->parent; //나머지 그 위 노드들에 대해서는 while문에 맡긴다
 			}
 			else
 			{
@@ -145,11 +144,11 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				insert_node->parent->color = BLACK;
 				insert_node->parent->parent->color = RED;
 				puts("요놈이었네");
-				if (Grandparent->right == self->nillnode)
+				if (insert_node->parent->parent->right == self->nillnode)
 				{
 					puts("이건 말이 안돼");
 				}
-				left_rotate(Grandparent, self);
+				left_rotate(insert_node->parent->parent, self);
 			}
 		}
 
