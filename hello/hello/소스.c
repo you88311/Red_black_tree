@@ -38,7 +38,7 @@ RB_Tree* RB_Tree_alloc(void)
 	Node* Nill_node = node_alloc(NULL);
 	Nill_node->color = BLACK;
 	tree->nillnode = Nill_node;
-	tree->root = NULL;
+	tree->root = Nill_node;
 	return tree;
 }
 
@@ -96,7 +96,7 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 	Node* Grandparent;
 	Node* Uncle = NULL;
 
-	while (insert_node != self->nillnode && insert_node->parent != self->nillnode  && insert_node->parent->color == RED) //부모 노드가 RED인 경우
+	while (  insert_node->parent != self->nillnode  && insert_node->parent->color == RED ) //부모 노드가 RED인 경우
 	{
 		Grandparent = insert_node->parent->parent;
 		if (insert_node->parent == Grandparent->left) // 부모노드가 Grandparent의 left인 경우
@@ -114,8 +114,9 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				/*case2*/
 				if (insert_node == insert_node->parent->right)
 				{
-					insert_node = insert_node->parent;
-					left_rotate(insert_node, self);
+					puts("case2");
+					left_rotate(insert_node->parent, self); //case3으로 만듬
+					
 				}
 				/*case3*/
 				insert_node->parent->color = BLACK;
@@ -123,7 +124,7 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				right_rotate(insert_node->parent->parent, self);
 			}
 		}
-		else //부모노드가 Grand	parent의 right인 경우
+		else if(insert_node->parent==Grandparent->right)//부모노드가 Grand	parent의 right인 경우
 		{
 			Uncle = Grandparent->left;
 			if (Uncle->color == RED) /*case 1*/
@@ -138,13 +139,17 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				/*case2*/
 				if (insert_node == insert_node->parent->left)
 				{
-					insert_node = insert_node->parent;
-					right_rotate(insert_node, self);
+					right_rotate(insert_node->parent, self);
 				}
 				/*case3*/
 				insert_node->parent->color = BLACK;
 				insert_node->parent->parent->color = RED;
-				left_rotate(insert_node->parent->parent, self);
+				puts("요놈이었네");
+				if (Grandparent->right == self->nillnode)
+				{
+					puts("이건 말이 안돼");
+				}
+				left_rotate(Grandparent, self);
 			}
 		}
 
@@ -155,38 +160,39 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 
 void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 {
+	Node*temp = tree;
+	Node*p = self->nillnode;
+
 	insert_node->left = self->nillnode;
 	insert_node->right = self->nillnode;
-	if (self->root == NULL) //Root가 비어있는 경우
+
+	while (temp != self->nillnode)
+	{
+		p = temp;
+		if (temp->value < insert_node->value)
+		{
+			temp = temp->right;
+		}
+		else
+		{
+			temp = temp->left;
+		}
+	}
+	insert_node->parent = p;
+	if (p == self->nillnode)
 	{
 		self->root = insert_node;
-		insert_node->color = BLACK;
-		insert_node->parent = self->nillnode;
 	}
-	else if (insert_node->value < tree->value) //현재 노드보다 작은 경우
+	else if (insert_node->value > p->value)
 	{
-		while (tree->left != self->nillnode)
-		{
-			tree = tree->left;
-		}
-		tree->left = insert_node;
-		insert_node->parent = tree;
-
+		p->right = insert_node;
 	}
-	else                      //현재 노드보다 큰 경우
+	else
 	{
-		while (tree->right != self->nillnode)
-		{
-			tree = tree->right;
-		}
-		tree->right = insert_node;
-		insert_node->parent = tree;
+		p->left = insert_node;
 	}
-	if (insert_node->parent != self->nillnode)
-	{
-		RB_Tree_insert_fix(insert_node, self);
-	}
-
+	
+	RB_Tree_insert_fix(insert_node, self);
 }
 
 
@@ -359,11 +365,11 @@ void RB_Tree_print(RB_Tree* self, Node* tree, int level, int* bn_count)
 
 void RB_inorder(RB_Tree* self, Node* tree, int* total)
 {
-	if (tree == NULL)
+	if (tree == NULL) //트리 자체가 없으면 나옴
 		return;
 	else {
 		RB_inorder(self, tree->left, total);
-		if (tree->value != self->nillnode)
+		if (tree != self->nillnode)
 		{
 			printf("%d ", tree->value);
 		}
@@ -384,18 +390,14 @@ int main(void)
 	while (is_running)
 	{
 		fscanf(fp, "%d", &data);
-		if (data > 0)
+		if (data != 0)
 		{
 			tree_insert(node_alloc(data), self, self->root);
-		}
-		else if (data < 0)
-		{
-			data = -data;
-			tree_delete(data, self, self->root);
 		}
 		else if (data == 0)
 		{
 			puts("Red_Black tree print!");
+			RB_inorder(self, self->root, &total);
 			is_running = 0;
 		}
 	}
