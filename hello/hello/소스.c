@@ -93,20 +93,21 @@ void right_rotate(Node* node, RB_Tree* self)
 
 void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 {
-	Node* Grandparent;
+	Node* Grandparent=insert_node->parent->parent;
 	Node* Uncle = NULL;
 
 	while (  insert_node->parent != self->nillnode  && insert_node->parent->color == RED ) //부모 노드가 RED인 경우
 	{
-		if (insert_node->parent == insert_node->parent->parent->left) // 부모노드가 Grandparent의 left인 경우
+		Grandparent = insert_node->parent->parent;
+		if (insert_node->parent == Grandparent->left) // 부모노드가 Grandparent의 left인 경우
 		{
-			Uncle = insert_node->parent->parent->right;
+			Uncle = Grandparent->right;
 			if (Uncle->color == RED) /*case 1*/    //uncle이 red인 경우
 			{
 				insert_node->parent->color = BLACK;
 				Uncle->color = BLACK;
-				insert_node->parent->parent->color = RED;
-				insert_node = insert_node->parent->parent; //나머지 그 위 노드에 대해서는 while문에 맡긴다
+				Grandparent->color = RED;
+				insert_node = Grandparent; //나머지 그 위 노드에 대해서는 while문에 맡긴다
 			}
 			else                                       //uncle이 black인 경우
 			{
@@ -114,13 +115,22 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				if (insert_node == insert_node->parent->right)
 				{
 					puts("case2");
+					if (insert_node->parent->right == self->nillnode)
+					{
+						puts("left_rotate하는데 자식이 없는 불가능한 경우..");
+					}
 					left_rotate(insert_node->parent, self); //case3으로 만듬
 					
 				}
 				/*case3*/
 				insert_node->parent->color = BLACK;
-				insert_node->parent->parent->color = RED;
-				right_rotate(insert_node->parent->parent, self);
+				Grandparent->color = RED;
+				puts("case3");
+				if (Grandparent->left == self->nillnode)
+				{
+					puts("left_rotate하는데 자식이 없는 불가능한 경우..");
+				}
+				right_rotate(Grandparent, self);
 			}
 		}
 		else if(insert_node->parent== insert_node->parent->parent->right)//부모노드가 Grand	parent의 right인 경우
@@ -143,7 +153,7 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				/*case3*/
 				insert_node->parent->color = BLACK;
 				insert_node->parent->parent->color = RED;
-				puts("요놈이었네");
+				puts("case6");
 				if (insert_node->parent->parent->right == self->nillnode)
 				{
 					puts("이건 말이 안돼");
@@ -319,7 +329,7 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 	if (delete_node == self->nillnode) //삭제할 data값을 갖는 노드가 없으면
 		return;
 	int y_original_color = delete_node->color; //y의 원래 color
-	if (delete_node->left == self->nillnode) //오른쪽에 child있음
+	if (delete_node->left == self->nillnode) //오른쪽에 child있음 혹은 둘 다 없음
 	{
 		x = delete_node->right;
 		RB_transplant(self, delete_node, x);
@@ -334,11 +344,12 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 		y = tree_minimum(delete_node->right, self);
 		y_original_color = y->color;
 		x = y->right;
-
-		RB_transplant(self, y, y->right);
-		y->right = delete_node->right;
-		y->right->parent = y;
-
+		if (y->parent != delete_node)
+		{
+			RB_transplant(self, y, y->right);
+			y->right = delete_node->right;
+			y->right->parent = y;
+		}
 
 		RB_transplant(self, delete_node, y);
 		y->left = delete_node->left;
