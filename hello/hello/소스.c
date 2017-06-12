@@ -234,7 +234,7 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 {
 	Node*s = NULL; //sibling 노드
 
-	while (x != self->root && x->color == BLACK)
+	while (x != self->root && x != self->nillnode && x->color == BLACK)
 	{
 		if (x == x->parent->left)
 		{
@@ -259,13 +259,13 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 				s = x->parent->right;
 			}
 
-			if (s->right->color == RED)
+			if (s->color==BLACK && s->right->color == RED)
 			{/*case4*/
-				s->color = x->parent->color;
+				s->color = RED;
 				x->parent->color = BLACK;
 				s->right->color = BLACK;
 				left_rotate(x->parent, self);
-				x = self->root;
+				x = self->root; //상황종료
 			}
 		}
 		else if (x == x->parent->right)
@@ -290,13 +290,13 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 				left_rotate(s, self);
 				s = x->parent->left;
 			}
-			if (s->left->color == RED)
+			if (s->color == BLACK && s->left->color == RED)
 			{
-				s->color = x->parent->color;
+				s->color = RED;
 				x->parent->color = BLACK;
 				s->left->color = BLACK;
 				right_rotate(x->parent, self);
-				x = self->root;
+				x = self->root; //상황종료
 			}
 		}
 	}
@@ -306,7 +306,7 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 void tree_delete(int data, RB_Tree* self, Node* tree)
 {
 	Node*delete_node = tree_search(self, tree, data); //삭제하고 싶은 노드
-	Node* y = delete_node; //삭제 혹은 이동되는 노드
+	Node* y = delete_node; //실제 삭제 혹은 이동되는 노드
 	Node* x = NULL;         //y의 원래 위치
 	if (delete_node == self->nillnode) //삭제할 data값을 갖는 노드가 없으면
 		return;
@@ -344,10 +344,10 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 	}
 }
 
-void RB_Tree_print(RB_Tree* self, Node* tree, int level, int* bn_count)
+void RB_Tree_print(RB_Tree* self, Node* tree, int level)
 {
 	if (tree->right != self->nillnode)
-		RB_Tree_print(self, tree->right, level + 1, bn_count);
+		RB_Tree_print(self, tree->right, level + 1);
 	for (int i = 0; i < level; i++)
 		printf("    ");
 	if (tree->color == BLACK)
@@ -358,50 +358,72 @@ void RB_Tree_print(RB_Tree* self, Node* tree, int level, int* bn_count)
 	{
 		printf("%d[red]\n", tree->value);
 	}
-	if (tree->color == BLACK)
-		*bn_count += 1;
 	if (tree->left != self->nillnode)
-		RB_Tree_print(self, tree->left, level + 1, bn_count);
+		RB_Tree_print(self, tree->left, level + 1);
 }
 
-void RB_inorder(RB_Tree* self, Node* tree, int* total)
+void RB_Tree_height(RB_Tree* self, Node* tree, int* bh)
+{
+	if (tree->left != self->nillnode)
+	{
+		if (tree->color == BLACK)
+		{
+			*bh += 1;
+		}
+		RB_Tree_height(self, tree->left, bh);
+	}
+	else
+		return;
+}
+void RB_inorder(RB_Tree* self, Node* tree, int* total, int* bn_count)
 {
 	if (tree == NULL) //트리 자체가 없으면 나옴
 		return;
 	else {
-		RB_inorder(self, tree->left, total);
+		RB_inorder(self, tree->left, total, bn_count);
 		if (tree != self->nillnode)
 		{
 			printf("%d ", tree->value);
+			(*total) += 1; //leaf제외 전체 노드 개수
+			if (tree->color == BLACK)
+			{
+				(*bn_count) += 1; //black_node 개수
+			}
 		}
-		(*total) += 1;
-		RB_inorder(self, tree->right, total);
+		RB_inorder(self, tree->right, total, bn_count);
 	}
 }
 int main(void)
 {
 	int data = 0;
 	int is_running = 1;
-	int nb_count = 0; //number of black node
+	int bn_count = 0; //number of black node
 	int total = 0;
-	int black_height_level = 0;
+	int black_height= 1;
 
 	RB_Tree* self = RB_Tree_alloc(); //RB_tree 선언
 	FILE *fp = fopen("input.txt", "r");
 	while (is_running)
 	{
 		fscanf(fp, "%d", &data);
-		if (data != 0)
+		if (data > 0)
 		{
 			tree_insert(node_alloc(data), self, self->root);
-
+		}
+		else if (data < 0)
+		{
+			data = -data;
+			tree_delete(data, self, self->root);
 		}
 		else if (data == 0)
 		{
-			puts("Red_Black tree print!");
-			RB_inorder(self, self->root, &total);
-			RB_Tree_print(self, self->root, 0, &nb_count);
+			puts("---------Red_Black tree inorder-------");
+			RB_inorder(self, self->root, &total, &bn_count);
+			RB_Tree_height(self, self->root, &black_height);
+			puts("");
 			puts("-----------------------------------");
+			printf("total: %d, black_node: %d, bh:%d\n", total,bn_count,black_height);
+			RB_Tree_print(self, self->root, 0);
 			is_running = 0;
 		}
 	}
