@@ -93,7 +93,7 @@ void right_rotate(Node* node, RB_Tree* self)
 
 void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 {
-	Node* Grandparent=insert_node->parent->parent;
+	Node* Grandparent;
 	Node* Uncle = NULL;
 
 	while (  insert_node->parent != self->nillnode  && insert_node->parent->color == RED ) //부모 노드가 RED인 경우
@@ -123,15 +123,15 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				right_rotate(Grandparent, self);
 			}
 		}
-		else if(insert_node->parent== insert_node->parent->parent->right)//부모노드가 Grand	parent의 right인 경우
+		else//부모노드가 Grandparent의 right인 경우
 		{
 			Uncle = insert_node->parent->parent->left;
 			if (Uncle->color == RED) /*case 1*/
 			{
 				insert_node->parent->color = BLACK;
 				Uncle->color = BLACK;
-				insert_node->parent->parent->color = RED;
-				insert_node = insert_node->parent->parent; //나머지 그 위 노드들에 대해서는 while문에 맡긴다
+				Grandparent->color = RED;
+				insert_node = Grandparent; //나머지 그 위 노드들에 대해서는 while문에 맡긴다
 			}
 			else
 			{
@@ -399,21 +399,16 @@ int main(void)
 	int is_running = 1;
 	int bn_count = 0; //number of black node
 	int total = 0;
-	int black_height= 1;
+	int black_height= 0;
 
 	RB_Tree* self = RB_Tree_alloc(); //RB_tree 선언
 	FILE *fp = fopen("input.txt", "r");
 	while (is_running)
 	{
 		fscanf(fp, "%d", &data);
-		if (data > 0)
+		if (data != 0)
 		{
 			tree_insert(node_alloc(data), self, self->root);
-		}
-		else if (data < 0)
-		{
-			data = -data;
-			tree_delete(data, self, self->root);
 		}
 		else if (data == 0)
 		{
