@@ -114,22 +114,12 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				/*case2*/
 				if (insert_node == insert_node->parent->right)
 				{
-					puts("case2");
-					if (insert_node->parent->right == self->nillnode)
-					{
-						puts("left_rotate하는데 자식이 없는 불가능한 경우..");
-					}
-					left_rotate(insert_node->parent, self); //case3으로 만듬
-					
+					insert_node = insert_node->parent;
+					left_rotate(insert_node, self); //case3으로 만듬	
 				}
 				/*case3*/
 				insert_node->parent->color = BLACK;
 				Grandparent->color = RED;
-				puts("case3");
-				if (Grandparent->left == self->nillnode)
-				{
-					puts("left_rotate하는데 자식이 없는 불가능한 경우..");
-				}
 				right_rotate(Grandparent, self);
 			}
 		}
@@ -148,21 +138,15 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 				/*case2*/
 				if (insert_node == insert_node->parent->left)
 				{
-					right_rotate(insert_node->parent, self);
+					insert_node = insert_node->parent;
+					right_rotate(insert_node, self);
 				}
 				/*case3*/
 				insert_node->parent->color = BLACK;
-				insert_node->parent->parent->color = RED;
-				puts("case6");
-				if (insert_node->parent->parent->right == self->nillnode)
-				{
-					puts("이건 말이 안돼");
-				}
-				left_rotate(insert_node->parent->parent, self);
+				Grandparent->color = RED;
+				left_rotate(Grandparent, self);
 			}
 		}
-
-
 	}
 	self->root->color = BLACK; //루트의 색을 black으로
 }
@@ -182,25 +166,23 @@ void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 		{
 			temp = temp->right;
 		}
-		else if (temp->value > insert_node->value)
+		else
 		{
 			temp = temp->left;
 		}
-		else
-			return;
 	}
 	insert_node->parent = p;
 	if (p == self->nillnode)
 	{
 		self->root = insert_node;
 	}
-	else if (insert_node->value > p->value)
+	else if (p->value >= insert_node->value )
 	{
-		p->right = insert_node;
+		p->left = insert_node;
 	}
 	else
 	{
-		p->left = insert_node;
+		p->right = insert_node;
 	}
 	
 	RB_Tree_insert_fix(insert_node, self);
@@ -412,13 +394,14 @@ int main(void)
 		if (data != 0)
 		{
 			tree_insert(node_alloc(data), self, self->root);
-			RB_Tree_print(self, self->root, 0, &nb_count);
-			puts("-----------------------------------");
+
 		}
 		else if (data == 0)
 		{
 			puts("Red_Black tree print!");
 			RB_inorder(self, self->root, &total);
+			RB_Tree_print(self, self->root, 0, &nb_count);
+			puts("-----------------------------------");
 			is_running = 0;
 		}
 	}
