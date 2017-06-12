@@ -172,10 +172,12 @@ void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 		{
 			temp = temp->right;
 		}
-		else
+		else if (temp->value > insert_node->value)
 		{
 			temp = temp->left;
 		}
+		else
+			return;
 	}
 	insert_node->parent = p;
 	if (p == self->nillnode)
@@ -355,7 +357,14 @@ void RB_Tree_print(RB_Tree* self, Node* tree, int level, int* bn_count)
 		RB_Tree_print(self, tree->right, level + 1, bn_count);
 	for (int i = 0; i < level; i++)
 		printf("    ");
-	printf("%d\n", tree->value);
+	if (tree->color == BLACK)
+	{
+		printf("%d[black]\n", tree->value);
+	}
+	else
+	{
+		printf("%d[red]\n", tree->value);
+	}
 	if (tree->color == BLACK)
 		*bn_count += 1;
 	if (tree->left != self->nillnode)
@@ -392,6 +401,8 @@ int main(void)
 		if (data != 0)
 		{
 			tree_insert(node_alloc(data), self, self->root);
+			RB_Tree_print(self, self->root, 0, &nb_count);
+			puts("-----------------------------------");
 		}
 		else if (data == 0)
 		{
