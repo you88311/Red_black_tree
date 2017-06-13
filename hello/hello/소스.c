@@ -431,6 +431,7 @@ int main(void)
 		fscanf(fp, "%d", &data);
 		if (data != 0)
 		{
+			
 			tree_insert(node_alloc(data), self, self->root);
 			left_RB_Tree_height(self, self->root, &left_bh);
 			right_RB_Tree_height(self, self->root, &right_bh);
