@@ -162,7 +162,7 @@ void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 	while (temp != self->nillnode)
 	{
 		p = temp;
-		if (temp->value < insert_node->value)
+		if (temp->value <= insert_node->value)
 		{
 			temp = temp->right;
 		}
@@ -176,7 +176,7 @@ void tree_insert(Node* insert_node, RB_Tree* self, Node* tree)
 	{
 		self->root = insert_node;
 	}
-	else if (p->value >= insert_node->value )
+	else if (p->value > insert_node->value )
 	{
 		p->left = insert_node;
 	}
@@ -222,7 +222,7 @@ Node* tree_search(RB_Tree* self, Node* tree, int val)  //특정값을 갖는 노드를 찾
 	{
 		return tree;
 	}
-	if (tree->value < val)
+	if (tree->value <= val)
 	{
 		return tree_search(self, tree->right, val);
 	}
@@ -232,7 +232,6 @@ Node* tree_search(RB_Tree* self, Node* tree, int val)  //특정값을 갖는 노드를 찾
 void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 {
 	Node*s = NULL; //sibling 노드
-	puts("실행은 함");
 	while (x != self->root && x->color == BLACK )
 	{
 		if (x == x->parent->left)
@@ -240,7 +239,6 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 			s = x->parent->right;
 			if (s->color == RED)
 			{/*case1*/
-				puts("case1");
 				s->color = BLACK;
 				x->parent->color = RED;
 				left_rotate(x->parent, self);
@@ -248,63 +246,64 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 			}
 			if (s->left->color == BLACK && s->right->color == BLACK)
 			{/*case2*/
-				puts("case2");
 				s->color = RED;
 				x = x->parent;
 			}
-			else if (s->left->color == RED && s->right->color == BLACK)
+			else 
 			{
-				puts("case3");
-				s->left->color = BLACK;
-				s->color = RED;
-				right_rotate(s, self);
-				s = x->parent->right;
+				if (s->left->color == RED && s->right->color == BLACK)
+				{
+					s->left->color = BLACK;
+					s->color = RED;
+					right_rotate(s, self);
+					s = x->parent->right;
+				}
+				if (s->color == BLACK && s->right->color == RED)
+				{/*case4*/
+					s->color = x->parent->color;
+					x->parent->color = BLACK;
+					s->right->color = BLACK;
+					left_rotate(x->parent, self);
+					x = self->root; //상황종료
+				}
 			}
 
-			if (s->color==BLACK && s->right->color == RED)
-			{/*case4*/
-				puts("case4");
-				s->color = RED;
-				x->parent->color = BLACK;
-				s->right->color = BLACK;
-				left_rotate(x->parent, self);
-				x = self->root; //상황종료
-			}
+
 		}
 		else
 		{
 			s = x->parent->left;
 			if (s->color == RED)
-			{/*case1*/
-				puts("case5");
+			{/*case1_대칭*/
 				s->color = BLACK;
 				x->parent->color = RED;
 				right_rotate(x->parent, self);
 				s = x->parent->left;
 			}
 			if (s->left->color == BLACK && s->right->color == BLACK)
-			{/*case2*/
-				puts("case6");
+			{/*case2_대칭*/
 				s->color = RED;
 				x = x->parent;
 			}
-			else if (s->left->color == BLACK && s->right->color == RED)
+			else
 			{
-				puts("case7");
-				s->right->color = BLACK;
-				s->color = RED;
-				left_rotate(s, self);
-				s = x->parent->left;
+				if (s->left->color == BLACK && s->right->color == RED)
+				{/*case3_대칭*/
+					s->right->color = BLACK;
+					s->color = RED;
+					left_rotate(s, self);
+					s = x->parent->left;
+				}
+				if (s->color == BLACK && s->left->color == RED)
+				{/*case4_대칭*/
+					s->color = x->parent->color;
+					x->parent->color = BLACK;
+					s->left->color = BLACK;
+					right_rotate(x->parent, self);
+					x = self->root; //상황종료
+				}
 			}
-			if (s->color == BLACK && s->left->color == RED)
-			{
-				puts("case8");
-				s->color = RED;
-				x->parent->color = BLACK;
-				s->left->color = BLACK;
-				right_rotate(x->parent, self);
-				x = self->root; //상황종료
-			}
+
 		}
 	}
 	
@@ -441,27 +440,20 @@ int main(void)
 		fscanf(fp, "%d", &data);
 		if (data > 0)
 		{
-			
 			tree_insert(node_alloc(data), self, self->root);
 			left_RB_Tree_height(self, self->root, &left_bh);
 			right_RB_Tree_height(self, self->root, &right_bh);
-			printf("%d insert\n", data);
 			if (left_bh != right_bh)
 			{
 				printf("insert한 후 왼쪽 오른쪽 bh가 맞지 않음\n left_bh:%d , right_bh:%d\n", left_bh, right_bh);
 				printf("insert_node:%d\n", data);
 			}
-			puts("---------insert한 후 트리---------");
-			RB_Tree_print(self, self->root, 0);
 			left_bh = 0;
 			right_bh = 0;
 		}
 		else if (data < 0)
 		{
-			puts("----------delete하기 전 bh가 맞는 트리----------------");
-			RB_Tree_print(self, self->root, 0);
 			data = -data;
-			printf("%d delete\n", data);
 			tree_delete(data, self, self->root);
 			left_RB_Tree_height(self, self->root, &left_bh);
 			right_RB_Tree_height(self, self->root, &right_bh);
@@ -484,8 +476,7 @@ int main(void)
 			right_RB_Tree_height(self, self->root, &right_bh);
 			puts("");
 			puts("-----------------------------------");
-			printf("total: %d, black_node: %d, left_bh:%d , right_bh:%d\n", total,bn_count,left_bh,right_bh);
-			RB_Tree_print(self, self->root, 0);
+			printf("total: %d, black_node: %d, bh:%d \n", total,bn_count,right_bh);
 			is_running = 0;
 		}
 	}
