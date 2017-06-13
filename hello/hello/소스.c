@@ -234,7 +234,7 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 {
 	Node*s = NULL; //sibling 노드
 	puts("실행은 함");
-	while (x != self->root && x != self->nillnode && x->color == BLACK)
+	while (x != self->root && x->color == BLACK && x->parent!=NULL)
 	{
 		if (x == x->parent->left)
 		{
@@ -308,6 +308,7 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 			}
 		}
 	}
+	
 	x->color = BLACK;
 }
 
@@ -319,8 +320,13 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 	int y_original_color = delete_node->color; //y의 원래 color
 	if (delete_node == self->nillnode) //삭제할 data값을 갖는 노드가 없으면
 		return;
-	
-	if (delete_node->left == self->nillnode) //오른쪽에 child있음 혹은 둘 다 없음
+	if (delete_node->left==self->nillnode && delete_node->right==self->nillnode)
+	{
+		x = delete_node->right;
+		x->parent = delete_node->parent;
+		RB_transplant(self, delete_node, x);
+	}
+	else if(delete_node->left == self->nillnode) //오른쪽에 child있음 혹은 둘 다 없음
 	{
 		x = delete_node->right;
 		RB_transplant(self, delete_node, x);
@@ -341,6 +347,10 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 			y->right = delete_node->right;
 			y->right->parent = y;
 		}
+		else
+		{
+			x->parent = y;
+		}
 
 		RB_transplant(self, delete_node, y);
 		y->left = delete_node->left;
@@ -351,6 +361,7 @@ void tree_delete(int data, RB_Tree* self, Node* tree)
 	{
 		RB_Tree_delte_fix(x, self, self->root);
 	}
+	self->nillnode->parent = NULL;
 }
 
 void RB_Tree_print(RB_Tree* self, Node* tree, int level)
@@ -429,21 +440,49 @@ int main(void)
 	while (is_running)
 	{
 		fscanf(fp, "%d", &data);
-		if (data != 0)
+		if (data > 0)
 		{
 			
 			tree_insert(node_alloc(data), self, self->root);
 			left_RB_Tree_height(self, self->root, &left_bh);
 			right_RB_Tree_height(self, self->root, &right_bh);
+			printf("%d insert\n", data);
 			if (left_bh != right_bh)
 			{
 				printf("insert한 후 왼쪽 오른쪽 bh가 맞지 않음\n left_bh:%d , right_bh:%d\n", left_bh, right_bh);
 				printf("insert_node:%d\n", data);
 			}
+			puts("---------insert한 후 트리");
+			RB_Tree_print(self, self->root, 0);
 			left_bh = 0;
 			right_bh = 0;
 		}
+		else if (data < 0)
+		{
+			puts("----------delete하기 전 bh가 맞는 트리----------------");
+			RB_Tree_print(self, self->root, 0);
+			data = -data;
+			printf("%d delete\n", data);
+			tree_delete(data, self, self->root);
+			left_RB_Tree_height(self, self->root, &left_bh);
+			right_RB_Tree_height(self, self->root, &right_bh);
+			if (left_bh != right_bh)
+			{
+				printf("delete한 후 왼쪽 오른쪽 bh가 맞지 않음\n left_bh:%d , right_bh:%d\n", left_bh, right_bh);
+				printf("delete_node:%d\n", -data);
+				RB_Tree_print(self, self->root, 0);
+				puts("-----------------delete한 후의 bh맞지 않는 트리--------------");
+			}
+			if (data == 896)
+			{
+				puts("------요놈 잡았다-------");
+				RB_Tree_print(self, self->root, 0);
+				puts("---------------------");
+			}
+			left_bh = 0;
+			right_bh = 0;
 
+		}
 		else if (data == 0)
 		{
 			puts("---------Red_Black tree inorder-------");
