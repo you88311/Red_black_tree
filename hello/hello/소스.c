@@ -125,7 +125,7 @@ void RB_Tree_insert_fix(Node* insert_node, RB_Tree* self)
 		}
 		else//부모노드가 Grandparent의 right인 경우
 		{
-			Uncle = insert_node->parent->parent->left;
+			Uncle = Grandparent->left;
 			if (Uncle->color == RED) /*case 1*/
 			{
 				insert_node->parent->color = BLACK;
@@ -211,10 +211,9 @@ void RB_transplant(RB_Tree* self, Node* delete_node, Node* child)
 	{
 		delete_node->parent->right = child;
 	}
-	if (child != self->nillnode)
-	{
+
 		child->parent = delete_node->parent;
-	}
+
 }
 
 Node* tree_search(RB_Tree* self, Node* tree, int val)  //특정값을 갖는 노드를 찾아 반환하는 함수
@@ -234,7 +233,7 @@ void RB_Tree_delte_fix(Node* x, RB_Tree* self, Node* tree)
 {
 	Node*s = NULL; //sibling 노드
 	puts("실행은 함");
-	while (x != self->root && x->color == BLACK && x->parent!=NULL)
+	while (x != self->root && x->color == BLACK )
 	{
 		if (x == x->parent->left)
 		{
@@ -452,7 +451,7 @@ int main(void)
 				printf("insert한 후 왼쪽 오른쪽 bh가 맞지 않음\n left_bh:%d , right_bh:%d\n", left_bh, right_bh);
 				printf("insert_node:%d\n", data);
 			}
-			puts("---------insert한 후 트리");
+			puts("---------insert한 후 트리---------");
 			RB_Tree_print(self, self->root, 0);
 			left_bh = 0;
 			right_bh = 0;
@@ -470,14 +469,8 @@ int main(void)
 			{
 				printf("delete한 후 왼쪽 오른쪽 bh가 맞지 않음\n left_bh:%d , right_bh:%d\n", left_bh, right_bh);
 				printf("delete_node:%d\n", -data);
-				RB_Tree_print(self, self->root, 0);
 				puts("-----------------delete한 후의 bh맞지 않는 트리--------------");
-			}
-			if (data == 896)
-			{
-				puts("------요놈 잡았다-------");
 				RB_Tree_print(self, self->root, 0);
-				puts("---------------------");
 			}
 			left_bh = 0;
 			right_bh = 0;
